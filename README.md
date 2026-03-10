@@ -1,9 +1,9 @@
 # DreamAI
-- [DreamAI::DreamAI](#dreamaidreamai)
+- [DreamAI2::DreamAI2](#dreamaidreamai)
    - Imputation of Missing Protein Abundances with Iterative Prediction Model
-- [DreamAI::DreamAI_Bagging](#dreamaidreamai_bagging)
+- [DreamAI2::DreamAI2_Bagging](#dreamaidreamai_bagging)
    - Bag Imputation of Missing Protein Abundances with Iterative Prediction Model
-- [DreamAI::bag.summary](#dreamaibagsummary)
+- [DreamAI2::bag.summary](#dreamaibagsummary)
    - Wrapper function for summarizing the outputs from DreamAI_bagging
 
 ## DreamAI::DreamAI
@@ -16,8 +16,9 @@
 
 ### Description
 
-The function DreamAI imputes a dataset with missing values or NA's using 7 different methods: 
+The function DreamAI2 imputes a dataset with missing values or NA's using individual or ensemble matrix from 7 different methods.
 
+Individual methods:
  - "KNN": k nearest neighbor 
  - "MissForest": nonparametric Missing Value
    Imputation using Random Forest 
@@ -25,19 +26,24 @@ The function DreamAI imputes a dataset with missing values or NA's using 7 diffe
    imputation
    - "Birnn": imputation using IRNN-SCAD algorithm 
    - "SpectroFM": imputation using matrix factorization 
-   -  "RegImpute": imputation using Glmnet ridge regression  
-   -  "Ensemble": aggregation of the 6 methods
-   using simple average.
+   -  "RegImpute": imputation using Glmnet ridge regression
+   -  "MICE": Multiple Imputation by Chained Equations
+
+Ensemble methods
+   -  "Ensemble": average of the 7 individual methods or the user specified methods among the 7.
+   -  "Ensemble.Fast": average of the 7 individual methods or the user specified methods among the 7 excluding "MissForest".
+
 
 ### Usage
 ```
-DreamAI(data, k = 10, maxiter_MF = 10, ntree = 100,
+DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100,
   maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2),
   gamma_ADMIN = NA, gamma = 50, CV = FALSE,
   fillmethod = "row_mean", maxiter_RegImpute = 10,
-  conv_nrmse = 1e-06, iter_SpectroFM = 40, method = c("KNN",
-  "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute"),
-  out = c("Ensemble"))
+  conv_nrmse = 1e-06, iter_SpectroFM = 40,
+  m_mice = 1, method_mice = 'pmm', maxit_mice = 20,
+  method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),
+  out = c("Ensemble.Fast"))
 ```
 ### Arguments
   
@@ -57,12 +63,15 @@ DreamAI(data, k = 10, maxiter_MF = 10, ntree = 100,
 | maxiter_RegImpute			     | 10         | maximum number of iterations to reach convergence in the imputation by "RegImpute"
 | conv_nrmse			             | 1e-06     	     | convergence threshold for "RegImpute"
 | iter_SpectroFM		    | 40     	     | number of iterations for "SpectroFM"
-| method		      | c("KNN","MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "Ensemble")     	   | a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute", "Ensemble"). 
-| out		      | c("Ensemble")     	   | a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble"
+| m_mice  		    | 1     	     | Number of multiple imputations in "MICE"
+| method_mice	    | "pmm"     	 | imputation method to be used for each column in "MICE"
+| maxit_mice		| 20     	     | A scalar giving the number of iterations in "MICE"
+| method		      | c("KNN","MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE")     	   | a vector of imputation methods selected from "KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute" and "MICE". 
+| out		      | c("Ensemble.Fast")     	   | a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble.Fast"
 
 	
 ### Value
-a list of imputed datasets by different methods as specified by the user. Always returns imputed data by "Ensemble"
+a list of imputed datasets by different methods as specified by the user. 
 
 ### Notes
 If all methods are specified for obtaining "Ensemble" imputed matrix, the approximate time required to output the imputed matrix for a dataset of dimension 26000 x 200 is ~50 hours.
@@ -71,7 +80,8 @@ If all methods are specified for obtaining "Ensemble" imputed matrix, the approx
 ```
 data(datapnnl)
 data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40, method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute"),out="Ensemble")
+impute<- DreamAI(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40, m_mice = 1, method_mice = 'pmm', maxit_mice = 20,
+method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute","MICE"),out="Ensemble.Fast")
 impute$Ensemble
 ```
 
@@ -89,12 +99,13 @@ The function DreamAI_bagging imputes a dataset with missing values or NA's by ba
 
 ### Usage
 ```
-DreamAI_Bagging(data, k = 10, maxiter_MF = 10, ntree = 100,
+DreamAI2_Bagging(data, k = 10, maxiter_MF = 10, ntree = 100,
   maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2),
   gamma_ADMIN = NA, gamma = 50, CV = FALSE,
   fillmethod = "row_mean", maxiter_RegImpute = 10,
-  conv_nrmse = 1e-06, iter_SpectroFM = 40, method = c("KNN",
-  "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "Ensemble"),out=c("Enemble"),
+  conv_nrmse = 1e-06, iter_SpectroFM = 40,
+  m_mice = 1, method_mice = 'pmm', maxit_mice = 20,
+  method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),out=c("Enemble.Fast"),
   SamplesPerBatch, n.bag, save.out = TRUE, path = NULL, ProcessNum)
 ```
 ### Arguments
@@ -115,13 +126,16 @@ DreamAI_Bagging(data, k = 10, maxiter_MF = 10, ntree = 100,
 | maxiter_RegImpute			     | 10         | maximum number of iterations to reach convergence in the imputation by "RegImpute"
 | conv_nrmse			             | 1e-06     	     | convergence threshold for "RegImpute"
 | iter_SpectroFM		    | 40     	     | number of iterations for "SpectroFM"
-| method		      | must specify    | a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute", "Ensemble")
+| m_mice  		    | 1     	     | Number of multiple imputations in "MICE"
+| method_mice	    | "pmm"     	 | imputation method to be used for each column in "MICE"
+| maxit_mice		| 20     	     | A scalar giving the number of iterations in "MICE"
+| method		      | must specify    | a vector of imputation methods selected from "KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute", "MICE"
 | SamplesPerBatch			             |      	     | number of samples per batch (batch size in the original data)
 | n.bag		    |      	     | number of pseudo datasets to generate and impute in the current process   
 |save.out            |     | logical indicator whether or not to save the output. When TRUE output is saved, when FALSE output is returned
 | path		      | NULL	   | location to save the output file from the curent process. Path only needs to be specified when save.out=TRUE
 | ProcessNum		      |     	   | process number starting from 1 when run in cluster, e.g. 1 - 10, 1 - 100 etc. Needs to be specified only if the output is saved
-| out		      | "Ensemble"     	   | a vector of imputation methods for which the function will output the imputed matrices. Default is Ensemble
+| out		      | "Ensemble.Fast"     	   | a vector of imputation methods for which the function will output the imputed matrices.
 
 	
 ### Value
@@ -134,11 +148,12 @@ This function can be run as parallel job in cluster. It generates and saves a .R
 ```
 data(datapnnl)
 data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","Ensemble"),SamplesPerBatch=3,n.bag=2,save.out=TRUE,path="C:\\Users\\chowds14\\Desktop\\test_package\\",ProcessNum=1)
-impute$Ensemble
+impute<- DreamAI2_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,m_mice = 1, method_mice = 'pmm', maxit_mice = 20,
+method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"),SamplesPerBatch=3,n.bag=2,save.out=TRUE,path="C:\\Users\\chowds14\\Desktop\\test_package\\",ProcessNum=1)
+impute$Ensemble.Fast
 ```
 
-## DreamAI::bag.summary
+## DreamAI2::bag.summary
 - [Description](#description-2)
 - [Usage](#usage-2)
 - [Arguments](#arguments-2)
@@ -147,18 +162,18 @@ impute$Ensemble
 
 ### Description
 
-Wrapper function for summarizing the outputs from DreamAI_bagging
+Wrapper function for summarizing the outputs from DreamAI2_bagging
 
 ### Usage
 ```
 bag.summary(method = c("KNN", "MissForest", "ADMIN", "Birnn",
-  "SpectroFM", "RegImpute", "Ensemble"), nNodes = 3, path = NULL)
+  "SpectroFM", "RegImpute", "MICE"), nNodes = 3, path = NULL)
 ```
 ### Arguments
   
 | Parameter                 | Default       | Description   |	
 | :------------------------ |:-------------:| :-------------|
-| method	       |	Ensemble         |a vector of imputation methods. This vector should be same or subset of the vector out in DreamAI_bagging. Default is "Ensemble"
+| method	       |	Ensemble         |a vector of imputation methods. This vector should be same or subset of the vector out in DreamAI2_bagging. Default is "Ensemble"
 | nNodes         |            |number of parallel processes
 | path 	       |NULL	            |location where the bagging output is saved
 	
@@ -169,8 +184,9 @@ list of final imputed data and confidence score for every gene using pseudo miss
 ```
 data(datapnnl)
 data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","Ensemble"),SamplesPerBatch=3,n.bag=2,save.out=TRUE,path="C:\\Users\\chowds14\\Desktop\\test_package\\",ProcessNum=1)
-final.out<-bag.summary(method=c("Ensemble"),nNodes=2,path="C:\\Users\\chowds14\\Desktop\\test_package\\")
+impute<- DreamAI2_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,m_mice = 1, method_mice = 'pmm', maxit_mice = 20,
+method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"),SamplesPerBatch=3,n.bag=2,save.out=TRUE,path="C:\\Users\\chowds14\\Desktop\\test_package\\",ProcessNum=1)
+final.out<-bag.summary(method=c("KNN"),nNodes=2,path="C:\\Users\\chowds14\\Desktop\\test_package\\")
 final.out$score
 final.out$imputed_data
 ```
