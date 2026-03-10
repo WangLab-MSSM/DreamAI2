@@ -1,4 +1,4 @@
-# DreamAI
+# DreamAI2
 - [DreamAI2::DreamAI2](#dreamaidreamai)
    - Imputation of Missing Protein Abundances with Iterative Prediction Model
 - [DreamAI2::DreamAI2_Bagging](#dreamaidreamai_bagging)
@@ -6,7 +6,7 @@
 - [DreamAI2::bag.summary](#dreamaibagsummary)
    - Wrapper function for summarizing the outputs from DreamAI_bagging
 
-## DreamAI::DreamAI
+## DreamAI2::DreamAI2
 - [Description](#description)
 - [Usage](#usage)
 - [Arguments](#arguments)
