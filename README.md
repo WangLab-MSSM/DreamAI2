@@ -4,7 +4,7 @@
 - [DreamAI2::DreamAI2_Bagging](#dreamaidreamai_bagging)
    - Bag Imputation of Missing Protein Abundances with Iterative Prediction Model
 - [DreamAI2::bag.summary](#dreamaibagsummary)
-   - Wrapper function for summarizing the outputs from DreamAI_bagging
+   - Wrapper function for summarizing the outputs from DreamAI2_bagging
 
 ## DreamAI2::DreamAI2
 - [Description](#description)
@@ -80,7 +80,7 @@ If all methods are specified for obtaining "Ensemble" imputed matrix, the approx
 ```
 data(datapnnl)
 data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40, m_mice = 1, method_mice = 'pmm', maxit_mice = 20,
+impute<- DreamAI2(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40, m_mice = 1, method_mice = 'pmm', maxit_mice = 20,
 method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute","MICE"),out="Ensemble.Fast")
 impute$Ensemble
 ```
@@ -95,7 +95,7 @@ impute$Ensemble
 
 ### Description
 
-The function DreamAI_bagging imputes a dataset with missing values or NA's by bag imputaion with help of parallel processing. Pseudo datasets are generated having true missing (as in the original dataset) and pseudo missing and every such pseudo dataset is imputed by individual or ensemble output of the 7 different methods: KNN, MissForest, ADMIN, Birnn, SpectroFM, RegImpute and MICE (descriptions are included in the documentation of the function DreamAI2).
+The function DreamAI2_bagging imputes a dataset with missing values or NA's by bag imputaion with help of parallel processing. Pseudo datasets are generated having true missing (as in the original dataset) and pseudo missing and every such pseudo dataset is imputed by individual or ensemble output of the 7 different methods: KNN, MissForest, ADMIN, Birnn, SpectroFM, RegImpute and MICE (descriptions are included in the documentation of the function DreamAI2).
 
 ### Usage
 ```
