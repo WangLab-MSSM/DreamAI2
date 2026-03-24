@@ -1,0 +1,41 @@
+DreamAI2                Imputation of Missing Protein Abundances with
+                        Iterative Prediction Model
+DreamAI2_Bagging        Bag Imputation of Missing Protein Abundances
+                        with Iterative Prediction Model
+backfill                Fill-in missing values using simple imputation.
+bag.summary             Wrapper function for summarizing the outputs
+                        from DreamAI_bagging
+gamma.CV                title: the selection process of parameter gamma
+                        using Cross Validation
+impute.ADMIN            Imputation of Missing Protein Abundances using
+                        ADMIN (Abundance Dependent Missing Imputation
+                        Mechanism)
+impute.Birnn            Imputation of Missing Protein Abundances using
+                        IRNN-SCAD Algorithm
+impute.KNN              Imputation of Missing Protein Abundances using
+                        K Nearest Neighbour
+impute.MF               Imputation of Missing Protein Abundances using
+                        MissForest
+impute.RegImpute        Imputation of Missing Protein Abundance using
+                        Glmnet Ridge Regression.
+impute.SpectroFM        Imputation of Missing Protein Abundances using
+                        Matrix Factorization
+impute.mice             Imputation of Missing Protein Abundances using
+                        MICE
+mc.IRNN                 title: IRNN algorithm for matrix completion
+                        Arguments: fun_sg: scad_sg, mcp_sg, the
+                        supergradient of the selected nonconvex
+                        surrogate function of L0 norm y: a vector with
+                        all entry values IDX: a vector with all entry
+                        positions m: the number of rows present in the
+                        incomplete dataset (proteins) n: the number of
+                        columns present in the incomplete dataset
+                        (samples) gamma: 'fun_sg"s parameter x_initial:
+                        the initial matrix
+returnPresentIndices    Return current column indices where values are
+                        not missing.
+returnTargets           Return target set for current column.
+returnTestIndices       Return current column indices where values are
+                        missing.
+returnTestSet           Return back filled data for test indices.
+returnTrainingSet       Return training set for current column.
