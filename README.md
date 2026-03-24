@@ -1,8 +1,8 @@
 # DreamAI2
 - [DreamAI2::DreamAI2](#DreamAI2DreamAI2)
-   - Imputation of Missing Protein Abundances with Iterative Prediction Model
+   - An Imputation Tool for Data-Independent Acquisition Proteomics Data
 - [DreamAI2::DreamAI2_Bagging](#DreamAI2DreamAI2_bagging)
-   - Bag Imputation of Missing Protein Abundances with Iterative Prediction Model
+   - Bag Imputation for Data-Independent Acquisition Proteomics Data
 - [DreamAI2::bag.summary](#DreamAI2bagsummary)
    - Wrapper function for summarizing the outputs from DreamAI2_bagging
 
@@ -16,17 +16,21 @@
 
 ### Description
 
-The function DreamAI2 imputes a dataset with missing values or NA's using 7 different methods: 
+The function DreamAI2 imputes a dataset with missing values using individual or ensemble output from 7 different methods: 
 
+Individual methods:
  - "KNN": k nearest neighbor 
- - "MissForest": nonparametric Missing Value
-   Imputation using Random Forest 
-  - "ADMIN": abundance dependent missing
-   imputation
+ - "MissForest": nonparametric missing value
+   imputation using Random Forest 
+  - "ADMIN": abundance dependent missing imputation
    - "Birnn": imputation using IRNN-SCAD algorithm 
    - "SpectroFM": imputation using matrix factorization 
-   -  "RegImpute": imputation using Glmnet ridge regression  
-   -  "Ensemble": aggregation of the 6 methods
+   -  "RegImpute": imputation using glmnet ridge regression
+   -  "MICE": multivariate imputation by chained equations
+     
+Ensembel methods:
+   -  "Ensemble": aggregation of the all 7 methods or selected methods
+   -  "Ensemble.Fast": aggregation of the all 7 methods or selected methods excluding "MissForest"
    using simple average.
 
 ### Usage
@@ -35,9 +39,10 @@ DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100,
   maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2),
   gamma_ADMIN = NA, gamma = 50, CV = FALSE,
   fillmethod = "row_mean", maxiter_RegImpute = 10,
-  conv_nrmse = 1e-06, iter_SpectroFM = 40, method = c("KNN",
-  "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute"),
-  out = c("Ensemble"))
+  conv_nrmse = 1e-06, iter_SpectroFM = 40,
+  m_mice = 1, method_mice = "pmm", maxit_mice = 20,
+  method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute","MICE"),
+  out = c("Ensemble.Fast"))
 ```
 ### Arguments
   
