@@ -77,8 +77,7 @@ If all methods are specified for obtaining "Ensemble" imputed matrix, the approx
 
 ### Example
 ```
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
+data<-data.DIA[1:100,1:50]
 impute<- DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2),gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"), out = c("Ensemble","Ensemble.Fast"))
 impute$Ensemble
 impute$Ensemble.Fast
@@ -144,8 +143,7 @@ This function can be run as parallel job in cluster. It generates and saves a .R
 
 ### Example
 ```
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
+data<-data.DIA[1:100,1:50]
 impute<-DreamAI2_Bagging(data = data,k = 10,maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2), gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"), out = c("Ensemble.Fast"), SamplesPerBatch = 1, n.bag = 2, save.out = TRUE, path = "dir_of_bagging_imputation_output", ProcessNum = 1)
 impute$impute$Ensemble.Fast
 ```
@@ -179,8 +177,7 @@ list of final imputed data and confidence score for every gene using pseudo miss
 
 ### Example
 ```
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
+data<-data.DIA[1:100,1:50]
 impute<-DreamAI2_Bagging(data = data,k = 10,maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2), gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"), out = c("Ensemble.Fast"), SamplesPerBatch = 1, n.bag = 2, save.out = TRUE, path = "dir_of_bagging_imputation_output", ProcessNum = 1)
 final.out<-bag.summary(method = c("Ensemble.Fast"), nNodes = 2, path = "dir_of_bagging_imputation_output")
 final.out$score
