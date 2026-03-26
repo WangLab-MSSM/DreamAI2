@@ -21,7 +21,7 @@ DreamAI2(
   iter_SpectroFM = 40,
   m_mice = 1,
   method_mice = "pmm",
-  maxit_mice = 20,
+  maxiter_mice = 20,
   method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),
   out = c("Ensemble.Fast")
 )
@@ -55,15 +55,15 @@ DreamAI2(
 
 \item{iter_SpectroFM}{number of iterations for "SpectroFM".}
 
+\item{m_mice}{Number of multiple imputations in MICE. The default is m=1.}
+
+\item{method_mice}{Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.}
+
+\item{maxiter_mice}{A scalar giving the number of iterations in MICE. The default is 20.}
+
 \item{method}{a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute") based on which "Ensemble" imputed matrix will be obtained.}
 
 \item{out}{a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble".}
-
-\item{mice_m}{Number of multiple imputations in MICE. The default is m=1.}
-
-\item{mice_method}{Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.}
-
-\item{mice_maxit}{A scalar giving the number of iterations in MICE. The default is 20.}
 }
 \value{
 a list of imputed datasets by different methods as specified by the user. Always returns imputed data by "Ensemble"
@@ -78,9 +78,12 @@ If all methods are specified for obtaining "Ensemble" imputed matrix, the approx
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40, method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),out="Ensemble.Fast")
+data<-data.DIA[1:100,1:50]
+impute<- DreamAI(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,
+maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,
+gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,
+method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),
+out="Ensemble.Fast")
 impute$Ensemble
 }
 }

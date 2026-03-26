@@ -12,6 +12,8 @@ impute.RegImpute(data, fillmethod, maxiter_RegImpute, conv_nrmse)
 \item{fillmethod}{a string identifying the method to be used that could be "row_mean" or "zeros", with "row_mean" being the default. It throws an warning if "row_median" is used.}
 
 \item{maxiter_RegImpute}{a integer identifying maximum number of iterations to reach convergence}
+
+\item{conv_nrmse}{convergence threshold of NRMSE}
 }
 \value{
 the imputed version of the dataset
@@ -21,8 +23,8 @@ The function impute.RegImpute imputes a dataset with missing values or NA's usin
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
-impute.RegImpute(data=as.matrix(data), fillmethod = "row_mean", maxiter_RegImpute = 10,conv_nrmse = 1e-06)
+data<-data.DIA[1:100,1:50]
+impute.RegImpute(data=as.matrix(data), fillmethod = "row_mean",
+maxiter_RegImpute = 10,conv_nrmse = 1e-06)
 }
 }

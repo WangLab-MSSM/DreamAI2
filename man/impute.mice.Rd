@@ -14,6 +14,8 @@ impute.mice(data, m = 1, method = "pmm", maxit = 20, ...)
 \item{method}{Specifying the imputation method to be used for each column in data. The default is 'pmm'.}
 
 \item{maxit}{A scalar giving the number of iterations. The default is 20.}
+
+\item{...}{other parameters in mice() function}
 }
 \value{
 the imputed version of the dataset
@@ -23,8 +25,7 @@ The function impute.mice imputes a dataset with missing values or NA's using mic
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
+data<-data.DIA[1:100,1:50]
 impute.mice(data=as.matrix(data))
 }
 }

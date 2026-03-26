@@ -5,7 +5,8 @@
 \title{Wrapper function for summarizing the outputs from DreamAI_bagging}
 \usage{
 bag.summary(
-  method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "Ensemble"),
+  method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE",
+    "Ensemble", "Ensemble.Fast"),
   nNodes = 2,
   path = NULL
 )
@@ -25,10 +26,13 @@ Wrapper function for summarizing the outputs from DreamAI_bagging
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute"),out=c("Ensemble"),SamplesPerBatch=3,n.bag=2,save.out=TRUE,path="C:\\\\Users\\\\chowds14\\\\Desktop\\\\test_package\\\\",ProcessNum=1)
-final.out<-bag.summary(method=c("Ensemble"),nNodes=2,path="C:\\\\Users\\\\chowds14\\\\Desktop\\\\test_package\\\\")
+data<-data.DIA[1:100,1:50]
+impute<- DreamAI_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,
+maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,
+gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,
+method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"),out=c("Ensemble"),
+SamplesPerBatch=1,n.bag=2,save.out=TRUE,path="dir_of_bagging_results",ProcessNum=1)
+final.out<-bag.summary(method=c("Ensemble"),nNodes=2,path="dir_of_bagging_results")
 final.out$score
 final.out$imputed_data
 }

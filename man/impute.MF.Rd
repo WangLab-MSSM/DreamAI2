@@ -23,8 +23,7 @@ The function impute.MF imputes a dataset with missing values or NA's using MissF
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
+data<-data.DIA[1:100,1:50]
 impute.MF(data=as.matrix(data), maxiter_MF = 10, ntree = 100,maxnodes = NULL)
 }
 }

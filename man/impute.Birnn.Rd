@@ -24,8 +24,7 @@ The function impute.Birnn imputes a dataset with missing values or NA's using IR
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
+data<-data.DIA[1:100,1:50]
 impute.Birnn(data=as.matrix(data), gamma = 50, CV = FALSE)
 }
 }

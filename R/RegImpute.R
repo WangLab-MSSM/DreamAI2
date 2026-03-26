@@ -117,6 +117,7 @@ returnTestIndices<-function(col,data){
 
 #' Return back filled data for test indices.
 #' @param col A number indicating current columns index.
+#' @param filled A matrix, The data matrix after running backfill function.
 #' @param test_indices A list of indices corresponding to cells in current column that contain NaN.
 #' @return A matrix
 returnTestSet<-function(col,filled,test_indices){
@@ -130,14 +131,15 @@ returnTestSet<-function(col,filled,test_indices){
 #' @param data dataset in the form of a matrix or data frame with either NAs or 0s as missings.
 #' @param fillmethod a string identifying the method to be used that could be "row_mean" or "zeros", with "row_mean" being the default. It throws an warning if "row_median" is used.
 #' @param maxiter_RegImpute a integer identifying maximum number of iterations to reach convergence
+#' @param conv_nrmse convergence threshold of NRMSE
 #' @return the imputed version of the dataset
 #' @importFrom glmnet cv.glmnet
 #' @export
 #' @examples
 #' \dontrun{
-#' data(datapnnl)
-#' data<-datapnnl.rm.ref[1:100,1:21]
-#' impute.RegImpute(data=as.matrix(data), fillmethod = "row_mean", maxiter_RegImpute = 10,conv_nrmse = 1e-06)
+#' data<-data.DIA[1:100,1:50]
+#' impute.RegImpute(data=as.matrix(data), fillmethod = "row_mean",
+#' maxiter_RegImpute = 10,conv_nrmse = 1e-06)
 #' }
 impute.RegImpute <- function(data,fillmethod,maxiter_RegImpute,conv_nrmse){
   filled = backfill(data,fillmethod)
@@ -149,7 +151,7 @@ impute.RegImpute <- function(data,fillmethod,maxiter_RegImpute,conv_nrmse){
   for(i in 1:maxiter_RegImpute){
     print(paste("Working on Iteration: ",toString(i),"/",toString(maxiter_RegImpute)))
 
-        
+
     #Iterate over columns
     for(col in 1:dim(data)[2]){
 
@@ -166,29 +168,29 @@ impute.RegImpute <- function(data,fillmethod,maxiter_RegImpute,conv_nrmse){
         cv_fit <- glmnet::cv.glmnet(train, target, alpha=0, standardize=TRUE)
         opt_lambda = cv_fit$lambda.min
         fit = cv_fit$glmnet.fit
-        
+
         test<-as.matrix(test)
         if(dim(test)[2]==1)
         {
-          predicted = predict(fit, s = opt_lambda, newx=t(test))
+          predicted = stats::predict(fit, s = opt_lambda, newx=t(test))
         }else{
-          predicted = predict(fit, s = opt_lambda, newx=test)
-        }        
+          predicted = stats::predict(fit, s = opt_lambda, newx=test)
+        }
         filled[test_indices,col] = predicted
     }
 
 	#test for convergence at each iteration
-   	if(i==1){
-	impvals = filled[missing_indices]
-	}
+  if(i==1){
+	  impvals = filled[missing_indices]
+	  }
 	else{
 	NRMSE = sqrt(mean((impvals - filled[missing_indices])^2))
 	print(paste("NRMSE = ",NRMSE))
 	impvals = filled[missing_indices]
 	if (NRMSE<conv_nrmse){
-	return(filled)
-	}
-	}
+	    return(filled)
+	    }
+	  }
   }
   return(filled)
 }

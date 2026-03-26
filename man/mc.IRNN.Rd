@@ -2,18 +2,28 @@
 % Please edit documentation in R/Birnn.R
 \name{mc.IRNN}
 \alias{mc.IRNN}
-\title{title: IRNN algorithm for matrix completion
-Arguments:
-fun_sg: {scad_sg, mcp_sg}, the supergradient of the selected nonconvex surrogate function of L0 norm
-y: a vector with all entry values
-IDX: a vector with all entry positions
-m: the number of rows present in the incomplete dataset (proteins)
-n: the number of columns present in the incomplete dataset (samples)
-gamma: 'fun_sg''s parameter
-x_initial: the initial matrix}
+\title{: IRNN algorithm for matrix completion}
 \usage{
 mc.IRNN(fun_sg, y, IDX, m, n, gamma, x_initial)
 }
+\arguments{
+\item{fun_sg}{the supergradient of the selected nonconvex surrogate function of L0 norm of (scad_sg, mcp_sg)}
+
+\item{y}{a vector with all entry values}
+
+\item{IDX}{a vector with all entry positions}
+
+\item{m}{the number of rows present in the incomplete dataset (proteins)}
+
+\item{n}{the number of columns present in the incomplete dataset (samples)}
+
+\item{gamma}{'fun_sg''s parameter}
+
+\item{x_initial}{the initial matrix}
+}
+\value{
+: an imputed matrix
+}
 \description{
-return: an imputed matrix
+: IRNN algorithm for matrix completion
 }

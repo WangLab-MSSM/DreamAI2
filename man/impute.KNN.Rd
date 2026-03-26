@@ -19,8 +19,7 @@ The function impute.KNN imputes a dataset with missing values or NA's using k ne
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
+data<-data.DIA[1:100,1:50]
 impute.KNN(data=as.matrix(data), k=10)
 }
 }

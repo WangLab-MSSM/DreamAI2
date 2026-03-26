@@ -9,6 +9,8 @@ returnTestSet(col, filled, test_indices)
 \arguments{
 \item{col}{A number indicating current columns index.}
 
+\item{filled}{A matrix, The data matrix after running backfill function.}
+
 \item{test_indices}{A list of indices corresponding to cells in current column that contain NaN.}
 }
 \value{

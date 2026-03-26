@@ -34,8 +34,7 @@ The function impute.ADMIN imputes a dataset with missing values or NA's using AD
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
+data<-data.DIA[1:100,1:50]
 impute.ADMIN(data = as.matrix(data),k = 10, maxiter_ADMIN = 30, tol = 10^(-2))
 }
 }

@@ -22,7 +22,7 @@ DreamAI2_Bagging(
   iter_SpectroFM = 40,
   m_mice = 1,
   method_mice = "pmm",
-  maxit_mice = 20,
+  maxiter_mice = 20,
   method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),
   out = c("Ensemble.Fast"),
   seed.bags = NULL,
@@ -30,7 +30,7 @@ DreamAI2_Bagging(
   n.bag,
   save.out = TRUE,
   path = NULL,
-  ProcessNum
+  ProcessNum = 1
 )
 }
 \arguments{
@@ -64,9 +64,17 @@ DreamAI2_Bagging(
 
 \item{iter_SpectroFM}{number of iterations for "SpectroFM"}
 
+\item{m_mice}{Number of multiple imputations in MICE. The default is m=1.}
+
+\item{method_mice}{Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.}
+
+\item{maxiter_mice}{A scalar giving the number of iterations in MICE. The default is 20.}
+
 \item{method}{a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute") based on which "Ensemble" imputed matrix will be obtained.}
 
 \item{out}{a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble".}
+
+\item{seed.bags}{random seed used for generating missing values in bagging sets}
 
 \item{SamplesPerBatch}{number of samples per batch (batch size in the original data)}
 
@@ -77,12 +85,6 @@ DreamAI2_Bagging(
 \item{path}{location to save the output file from the curent process.  Path only needs to be specified when save.out=TRUE}
 
 \item{ProcessNum}{process number starting from 1 when run in cluster, e.g. 1 - 10, 1 - 100 etc. Needs to be specified only if the output is saved}
-
-\item{mice_m}{Number of multiple imputations in MICE. The default is m=1.}
-
-\item{mice_method}{Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.}
-
-\item{mice_maxit}{A scalar giving the number of iterations in MICE. The default is 20.}
 }
 \value{
 list of imputed dataset(average over all pseudo imputed data matrices) by different methods as specified by the user, n.bag and a matrix containing gene name, sample name, true and imputed values of every pseudo missing combined from n.bag datasets
@@ -95,9 +97,13 @@ This function can be run as parallel job in cluster. It generates and saves a .R
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_bagging=NA,gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute"),out=c("Ensemble"),SamplesPerBatch=3,n.bag=2,save.out=TRUE,path="C:\\\\Users\\\\chowds14\\\\Desktop\\\\test_package\\\\",ProcessNum=1)
+data<-data.DIA[1:100,1:50]
+impute<- DreamAI_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,
+maxiter_ADMIN=30,tol=10^(-2),gamma_bagging=NA,gamma_ADMIN=NA,
+gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,
+method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute","MICE"),
+out=c("Ensemble.Fast"),
+SamplesPerBatch=1,n.bag=2,save.out=TRUE,path="path_of_bagging_results",ProcessNum=1)
 impute$Ensemble
 }
 }

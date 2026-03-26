@@ -40,7 +40,7 @@ DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100,
   gamma_ADMIN = NA, gamma = 50, CV = FALSE,
   fillmethod = "row_mean", maxiter_RegImpute = 10,
   conv_nrmse = 1e-06, iter_SpectroFM = 40,
-  m_mice = 1, method_mice = "pmm", maxit_mice = 20,
+  m_mice = 1, method_mice = "pmm", maxiter_mice = 20,
   method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute","MICE"),
   out = c("Ensemble.Fast"))
 ```
@@ -62,22 +62,26 @@ DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100,
 | maxiter_RegImpute			     | 10         | maximum number of iterations to reach convergence in the imputation by "RegImpute"
 | conv_nrmse			             | 1e-06     	     | convergence threshold for "RegImpute"
 | iter_SpectroFM		    | 40     	     | number of iterations for "SpectroFM"
+| m_mice                | 1       | number of multiple imputations in "MICE"
+| method_mice           | "pmm"   | imputation method to be used for each column in "MICE"
+| maxiter_mice          | 20      | number of iterations in "MICE"
 | method		      | c("KNN","MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "Ensemble")     	   | a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute", "Ensemble"). 
 | out		      | c("Ensemble")     	   | a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble"
 
 	
 ### Value
-a list of imputed datasets by different methods as specified by the user. Always returns imputed data by "Ensemble"
+a list of imputed data sets by different methods as specified by the user. 
 
 ### Notes
-If all methods are specified for obtaining "Ensemble" imputed matrix, the approximate time required to output the imputed matrix for a dataset of dimension 26000 x 200 is ~50 hours.
+If all methods are specified for obtaining "Ensemble" imputed matrix, the approximate time required to output the imputed matrix for a dataset of dimension 10000 x 160 is ~ 2.5 hours.
 
 ### Example
 ```
 data(datapnnl)
 data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI2(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40, method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute"),out="Ensemble")
+impute<- DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2),gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"), out = c("Ensemble","Ensemble.Fast"))
 impute$Ensemble
+impute$Ensemble.Fast
 ```
 
 ## DreamAI2::DreamAI2_Bagging
@@ -100,7 +104,7 @@ DreamAI2_Bagging(data, k = 10, maxiter_MF = 10, ntree = 100,
   fillmethod = "row_mean", maxiter_RegImpute = 10,
   conv_nrmse = 1e-06, iter_SpectroFM = 40, method = c("KNN",
   "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "Ensemble"),out=c("Enemble"),
-  SamplesPerBatch, n.bag, save.out = TRUE, path = NULL, ProcessNum)
+  SamplesPerBatch, n.bag, save.out = TRUE, path = NULL, ProcessNum = 1)
 ```
 ### Arguments
   
@@ -120,13 +124,16 @@ DreamAI2_Bagging(data, k = 10, maxiter_MF = 10, ntree = 100,
 | maxiter_RegImpute			     | 10         | maximum number of iterations to reach convergence in the imputation by "RegImpute"
 | conv_nrmse			             | 1e-06     	     | convergence threshold for "RegImpute"
 | iter_SpectroFM		    | 40     	     | number of iterations for "SpectroFM"
+| m_mice                | 1       | number of multiple imputations in "MICE"
+| method_mice           | "pmm"   | imputation method to be used for each column in "MICE"
+| maxiter_mice          | 20      | number of iterations in "MICE"
 | method		      | must specify    | a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute", "Ensemble")
 | SamplesPerBatch			             |      	     | number of samples per batch (batch size in the original data)
 | n.bag		    |      	     | number of pseudo datasets to generate and impute in the current process   
 |save.out            |     | logical indicator whether or not to save the output. When TRUE output is saved, when FALSE output is returned
-| path		      | NULL	   | location to save the output file from the curent process. Path only needs to be specified when save.out=TRUE
-| ProcessNum		      |     	   | process number starting from 1 when run in cluster, e.g. 1 - 10, 1 - 100 etc. Needs to be specified only if the output is saved
-| out		      | "Ensemble"     	   | a vector of imputation methods for which the function will output the imputed matrices. Default is Ensemble
+| path		      | NULL	   | location to save the output file from the current process. Path only needs to be specified when save.out=TRUE
+| ProcessNum		      | 1    	   | process number starting from 1 when run in cluster, e.g. 1 - 10, 1 - 100 etc. Needs to be specified only if the output is saved
+| out		      | "Ensemble.Fast"     	   | a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble.Fast"
 
 	
 ### Value
@@ -139,8 +146,8 @@ This function can be run as parallel job in cluster. It generates and saves a .R
 ```
 data(datapnnl)
 data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI2_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","Ensemble"),SamplesPerBatch=3,n.bag=2,save.out=TRUE,path="C:\\Users\\chowds14\\Desktop\\test_package\\",ProcessNum=1)
-impute$Ensemble
+impute<-DreamAI2_Bagging(data = data,k = 10,maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2), gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"), out = c("Ensemble.Fast"), SamplesPerBatch = 1, n.bag = 2, save.out = TRUE, path = "dir_of_bagging_imputation_output", ProcessNum = 1)
+impute$impute$Ensemble.Fast
 ```
 
 ## DreamAI2::bag.summary
@@ -174,8 +181,8 @@ list of final imputed data and confidence score for every gene using pseudo miss
 ```
 data(datapnnl)
 data<-datapnnl.rm.ref[1:100,1:21]
-impute<- DreamAI2_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","Ensemble"),SamplesPerBatch=3,n.bag=2,save.out=TRUE,path="C:\\Users\\chowds14\\Desktop\\test_package\\",ProcessNum=1)
-final.out<-bag.summary(method=c("Ensemble"),nNodes=2,path="C:\\Users\\chowds14\\Desktop\\test_package\\")
+impute<-DreamAI2_Bagging(data = data,k = 10,maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2), gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"), out = c("Ensemble.Fast"), SamplesPerBatch = 1, n.bag = 2, save.out = TRUE, path = "dir_of_bagging_imputation_output", ProcessNum = 1)
+final.out<-bag.summary(method = c("Ensemble.Fast"), nNodes = 2, path = "dir_of_bagging_imputation_output")
 final.out$score
 final.out$imputed_data
 ```

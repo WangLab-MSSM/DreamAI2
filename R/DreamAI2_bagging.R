@@ -1,21 +1,12 @@
-#gamma.est = function(Ym)
-#{
-#  ### Ym dim Lxn
-#  Y.mean = apply(Ym,1,mean,na.rm=T);
-#  q = apply(is.na(Ym),1,mean);
-#  par = lsfit(Y.mean[q>0],log(1/q)[q>0])[[1]];
-#  names(par) = c('gamma0','gamma');
-#  return(par);
-#}
 
-#' @export
-avg.batch = function(data,SamplesPerBatch)
+#' @noRd
+avg_batch = function(data,SamplesPerBatch)
 {
   t(apply(data,1,function(x){apply(matrix(x,SamplesPerBatch),2,mean,na.rm=T)}));
 }
 
-#' @export
-diff.mr = function(x,gm.pnnl,data.obs.b,N){
+#' @noRd
+diff_mr = function(x,gm.pnnl,data.obs.b,N){
   p.temp = exp(x-gm.pnnl[2]*data.obs.b);
   p.temp[is.na(p.temp)] = 1;
   return(abs(mean(p.temp)-(sum(is.na(data.obs.b))+N)/sum(is.na(data.obs.b))*mean(is.na(data.obs.b))));
@@ -42,11 +33,12 @@ diff.mr = function(x,gm.pnnl,data.obs.b,N){
 #' @param maxiter_RegImpute maximum number of iterations to reach convergence in the imputation by "RegImpute"
 #' @param conv_nrmse convergence threshold for "RegImpute"
 #' @param iter_SpectroFM number of iterations for "SpectroFM"
-#' @param mice_m Number of multiple imputations in MICE. The default is m=1.
-#' @param mice_method Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.
-#' @param mice_maxit A scalar giving the number of iterations in MICE. The default is 20.
+#' @param m_mice Number of multiple imputations in MICE. The default is m=1.
+#' @param method_mice Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.
+#' @param maxiter_mice A scalar giving the number of iterations in MICE. The default is 20.
 #' @param method a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute") based on which "Ensemble" imputed matrix will be obtained.
 #' @param out a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble".
+#' @param seed.bags random seed used for generating missing values in bagging sets
 #' @param SamplesPerBatch number of samples per batch (batch size in the original data)
 #' @param n.bag number of pseudo datasets to generate and impute in the current process
 #' @param path location to save the output file from the curent process.  Path only needs to be specified when save.out=TRUE
@@ -57,17 +49,21 @@ diff.mr = function(x,gm.pnnl,data.obs.b,N){
 #' @export
 #' @examples
 #' \dontrun{
-#' data(datapnnl)
-#' data<-datapnnl.rm.ref[1:100,1:21]
-#' impute<- DreamAI_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_bagging=NA,gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute"),out=c("Ensemble"),SamplesPerBatch=3,n.bag=2,save.out=TRUE,path="C:\\Users\\chowds14\\Desktop\\test_package\\",ProcessNum=1)
+#' data<-data.DIA[1:100,1:50]
+#' impute<- DreamAI_Bagging(data=data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,
+#' maxiter_ADMIN=30,tol=10^(-2),gamma_bagging=NA,gamma_ADMIN=NA,
+#' gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,
+#' method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute","MICE"),
+#' out=c("Ensemble.Fast"),
+#' SamplesPerBatch=1,n.bag=2,save.out=TRUE,path="path_of_bagging_results",ProcessNum=1)
 #' impute$Ensemble
 #' }
 DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),
                            gamma_bagging = NA, gamma_ADMIN=NA,gamma=50,
                            CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,
-                           m_mice = 1, method_mice = 'pmm', maxit_mice = 20,
+                           m_mice = 1, method_mice = 'pmm', maxiter_mice = 20,
                            method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"),out=c("Ensemble.Fast"),
-                           seed.bags = NULL,SamplesPerBatch,n.bag,save.out=TRUE,path=NULL,ProcessNum)
+                           seed.bags = NULL,SamplesPerBatch,n.bag,save.out=TRUE,path=NULL,ProcessNum=1)
 {
   pkg.all = c("cluster"
               ,"survival"
@@ -92,21 +88,19 @@ DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NUL
                call. = FALSE)
   }
 
-  library("cluster")
-  library("survival")
-  library("randomForest")
-  library("missForest")
-  library("glmnet")
-  library("Rcpp")
-  library("foreach")
-  library("itertools")
-  library("iterators")
-  library("Matrix")
-  library("devtools")
-  library("impute")
-  library("mice")
-
-
+  # requireNamespace("cluster")
+  # requireNamespace("survival")
+  # requireNamespace("randomForest")
+  # requireNamespace("missForest")
+  # requireNamespace("glmnet")
+  # requireNamespace("Rcpp")
+  # requireNamespace("foreach")
+  # requireNamespace("itertools")
+  # requireNamespace("iterators")
+  # requireNamespace("Matrix")
+  # requireNamespace("devtools")
+  # requireNamespace("impute")
+  # requireNamespace("mice")
 
   ### method of imputation ###
   method.all<-c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE")
@@ -119,6 +113,7 @@ DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NUL
                 paste(method.all,collapse = ', '),'.\n'))
   }
 
+  # methods.match is the matched method names from input to the default 7 methods
   methods.match<- method.all[which(method.all %in% method)]
 
   n.method = length(methods.match)
@@ -129,12 +124,12 @@ DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NUL
     return(print("specify method"))
   }
 
-  if(mean(out%in%c(method,'Ensemble','Ensemble.Fast'))!=1)
+  if(mean(out%in%c(methods.match,'Ensemble','Ensemble.Fast'))!=1)
   {
     stop(paste0('\nNot identifiable output method name: ',
-                paste(setdiff(method,method.all),collapse = ', '),
+                paste(setdiff(out,c(methods.match,'Ensemble','Ensemble.Fast')),collapse = ', '),
                 '.\nPlease select among from the specified method: ',
-                paste(method.all,collapse = ', '),'.\n'))
+                paste(methods.match,collapse = ', '),'.\n'))
   }
 
   message(paste('\n',n.method,'methods specified, ensemble imputation will be generated with those algorithms:\n',
@@ -143,13 +138,13 @@ DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NUL
   if(sum(rowMeans(is.na(data))==1)>0){cat(paste('removing',sum(rowMeans(is.na(data))==1),'features with all missing values'))}
   data.obs <- data[rowMeans(is.na(data))!=1,];
 
-  data.obs.b <- avg.batch(data.obs,SamplesPerBatch=SamplesPerBatch)
-  if(is.na(gamma_bagging)){gm.pnnl <- gamma.est(data.obs.b)}else{gm.pnnl <- c(NA,gamma_bagging)}
+  data.obs.b <- avg_batch(data.obs,SamplesPerBatch=SamplesPerBatch)
+  if(is.na(gamma_bagging)){gm.pnnl <- gamma_est(data.obs.b)}else{gm.pnnl <- c(NA,gamma_bagging)}
 
   N <- sum(is.na(data.obs.b[!(apply(is.na(data.obs.b), 1, mean)==1),]))
 
 
-  gm1.new <- optimize(f = diff.mr,interval = c(-10,10),gm.pnnl=gm.pnnl,data.obs.b=data.obs.b,N=N)$minimum
+  gm1.new <- stats::optimize(f = diff_mr,interval = c(-10,10),gm.pnnl=gm.pnnl,data.obs.b=data.obs.b,N=N)$minimum
 
   p.pnnl <- exp(gm1.new-gm.pnnl[2]*data.obs.b)
   p.pnnl[is.na(p.pnnl)] <- 1
@@ -171,6 +166,17 @@ DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NUL
   if(length(seed.bags)!=n.bag)
     seed.bags <- 1:n.bag+1000000
 
+  # out.temp = union(method,out)
+  # out.temp is the matched output names from out to the input default methods (include all individual methods to form the ensemble methods)
+  out.temp = intersect(out,methods.match)
+
+  if("Ensemble.Fast" %in% out)
+    out.temp = union(out.temp,setdiff(methods.match,"MissForest"))
+  if("Ensemble" %in% out)
+    out.temp = union(out.temp,methods.match)
+
+  out.temp = union(out.temp,out)
+
   impute.sum = 0
 
   for (i in 1:n.bag)
@@ -178,7 +184,7 @@ DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NUL
     # TimeStart<-proc.time()
 
     set.seed(seed.bags[i]);
-    m.missing.b <- matrix(rbinom(length(p.pnnl), 1, c(p.pnnl)),dim(p.pnnl)[1]);
+    m.missing.b <- matrix(stats::rbinom(length(p.pnnl), 1, c(p.pnnl)),dim(p.pnnl)[1]);
     m.missing <- t(apply(m.missing.b,1,rep,each=SamplesPerBatch));
     # sum(m.missing.b-is.na(data.obs.b))
     #print(sum(m.missing!=t(is.na(apply(data.obs.b,1,rep,each=SamplesPerBatch)))));
@@ -187,10 +193,9 @@ DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NUL
     data.obs.new<-as.matrix(data.obs.new)
     data.obs.new[m.missing!=t(is.na(apply(data.obs.b,1,rep,each=SamplesPerBatch)))] <- NA;
 
-    out.temp = union(method,out)
     DreamAI.bagging.temp<-DreamAI2(data=data.obs.new,k=k,maxiter_MF = maxiter_MF, ntree = ntree,maxnodes = maxnodes,maxiter_ADMIN=maxiter_ADMIN,tol=tol,gamma_ADMIN=gamma_ADMIN,gamma=gamma,
                                     CV=CV,fillmethod=fillmethod,maxiter_RegImpute=maxiter_RegImpute,conv_nrmse = conv_nrmse,iter_SpectroFM=iter_SpectroFM,
-                                    m_mice = m_mice, method_mice = method_mice, maxit_mice = maxit_mice,
+                                    m_mice = m_mice, method_mice = method_mice, maxiter_mice = maxiter_mice,
                                     method=method,out=out.temp)
 
     ########## summary ###############
@@ -316,7 +321,7 @@ DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NUL
   # bag.output<-bag.imputed_matrix
 
   if(save.out){
-    save(bag.output,file=paste(path,"bag_imputed_",sprintf("%03d",ProcessNum),".RData",sep=""))
+    saveRDS(bag.output,file=paste(path,"bag_imputed_",sprintf("%03d",ProcessNum),".rds",sep=""))
   }else{
     return(bag.output)
   }

@@ -17,9 +17,9 @@
 #' @param maxiter_RegImpute maximum number of iterations to reach convergence in the imputation by "RegImpute".
 #' @param conv_nrmse convergence threshold for "RegImpute".
 #' @param iter_SpectroFM number of iterations for "SpectroFM".
-#' @param mice_m Number of multiple imputations in MICE. The default is m=1.
-#' @param mice_method Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.
-#' @param mice_maxit A scalar giving the number of iterations in MICE. The default is 20.
+#' @param m_mice Number of multiple imputations in MICE. The default is m=1.
+#' @param method_mice Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.
+#' @param maxiter_mice A scalar giving the number of iterations in MICE. The default is 20.
 #' @param method a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute") based on which "Ensemble" imputed matrix will be obtained.
 #' @param out a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble".
 #'
@@ -29,14 +29,17 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' data(datapnnl)
-#' data<-datapnnl.rm.ref[1:100,1:21]
-#' impute<- DreamAI(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40, method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),out="Ensemble.Fast")
+#' data<-data.DIA[1:100,1:50]
+#' impute<- DreamAI(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,
+#' maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,
+#' gamma=50,CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,
+#' method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),
+#' out="Ensemble.Fast")
 #' impute$Ensemble
 #' }
 DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,
                    CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,
-                   m_mice = 1, method_mice = 'pmm', maxit_mice = 20,
+                   m_mice = 1, method_mice = 'pmm', maxiter_mice = 20,
                    method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"),out=c("Ensemble.Fast"))
 {
   TimeStart<-proc.time()
@@ -63,19 +66,19 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
              call. = FALSE)
   }
 
-  library("cluster")
-  library("survival")
-  library("randomForest")
-  library("missForest")
-  library("glmnet")
-  library("Rcpp")
-  library("foreach")
-  library("itertools")
-  library("iterators")
-  library("Matrix")
-  library("devtools")
-  library("impute")
-  library("mice")
+  # requireNamespace("cluster")
+  # requireNamespace("survival")
+  # requireNamespace("randomForest")
+  # requireNamespace("missForest")
+  # requireNamespace("glmnet")
+  # requireNamespace("Rcpp")
+  # requireNamespace("foreach")
+  # requireNamespace("itertools")
+  # requireNamespace("iterators")
+  # requireNamespace("Matrix")
+  # requireNamespace("devtools")
+  # requireNamespace("impute")
+  # requireNamespace("mice")
 
   missing_rows = (which(rowSums(is.na(data))==dim(data)[2]))
   if(length(missing_rows)>0){
@@ -102,6 +105,7 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
               paste(method.all,collapse = ', '),'.\n'))
   }
 
+  # methods.match is the matched method names from input to the default 7 methods
   methods.match<- method.all[which(method.all %in% method)]
 
   n.method = length(methods.match)
@@ -112,16 +116,24 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
     return(print("specify method"))
   }
 
-  if(mean(out%in%c(method,'Ensemble','Ensemble.Fast'))!=1)
+  if(mean(out%in%c(methods.match,'Ensemble','Ensemble.Fast'))!=1)
   {
     stop(paste0('\nNot identifiable output method name: ',
-              paste(setdiff(method,method.all),collapse = ', '),
+              paste(setdiff(out,c(methods.match,'Ensemble','Ensemble.Fast')),collapse = ', '),
               '.\nPlease select among from the specified method: ',
-              paste(method.all,collapse = ', '),'.\n'))
+              paste(methods.match,collapse = ', '),'.\n'))
   }
 
   message(paste('\n',n.method,'methods specified, ensemble imputation will be generated with those algorithms:\n',
               paste0(methods.match,collapse = ', '),'\n'))
+
+  # out.match is the matched output names from out to the input default methods (include all individual methods to form the ensemble methods)
+  out.match = intersect(out,methods.match)
+
+  if("Ensemble.Fast" %in% out)
+    out.match = union(out.match,setdiff(methods.match,"MissForest"))
+  if("Ensemble" %in% out)
+    out.match = union(out.match,methods.match)
 
   ensemble<-matrix(0,nrow(data),ncol(data),dimnames = dimnames(data))
   method.idx<-1
@@ -130,7 +142,7 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
 
   ## KNN ##
 
-  if("KNN" %in% method)
+  if("KNN" %in% out.match)
   {
     name = "KNN"
     sink("NULL")
@@ -146,7 +158,7 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
   }
 
   ## MF ##
-  if("MissForest" %in% method)
+  if("MissForest" %in% out.match)
   {
     name = "MissForest"
     if(is.null(maxnodes))
@@ -166,7 +178,7 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
   }
 
   ## ADMIN ##
-  if("ADMIN" %in% method)
+  if("ADMIN" %in% out.match)
   {
     name = "ADMIN"
     sink("NULL")
@@ -183,7 +195,7 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
 
 
   ## Birnn ##
-  if("Birnn" %in% method)
+  if("Birnn" %in% out.match)
   {
     name = "Birnn"
     sink("NULL")
@@ -199,7 +211,7 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
   }
 
   ## SpectroFM ##
-  if("SpectroFM" %in% method)
+  if("SpectroFM" %in% out.match)
   {
     name = "SpectroFM"
     sink("NULL")
@@ -216,7 +228,7 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
 
 
   ## RegImpute ##
-  if("RegImpute" %in% method)
+  if("RegImpute" %in% out.match)
   {
     name = "RegImpute"
     sink("NULL")
@@ -232,11 +244,11 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
   }
 
   ## MICE ##
-  if("MICE" %in% method)
+  if("MICE" %in% out.match)
   {
     name = "MICE"
     sink("NULL")
-    d.impute.MICE = impute.mice(data = as.matrix(data),m = m_mice ,method = method_mice ,maxit = maxit_mice)
+    d.impute.MICE = impute.mice(data = as.matrix(data),m = m_mice ,method = method_mice ,maxit = maxiter_mice)
     # ensemble<-ensemble+d.impute.knn
     sink()
     # print(paste("Method",method.idx,"complete"))
@@ -252,11 +264,10 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
   df.impute.Ensemble = Reduce('+',imputed_matrix)/length(imputed_matrix)
   df.impute.Ensemble.Fast = Reduce('+',imputed_matrix[setdiff(names(imputed_matrix),"MissForest")])/length(setdiff(names(imputed_matrix),"MissForest"))
 
-  out_matrix = imputed_matrix
-  out_matrix[['Ensemble']] = df.impute.Ensemble
-  out_matrix[['Ensemble.Fast']] = df.impute.Ensemble.Fast
+  imputed_matrix[['Ensemble']] = df.impute.Ensemble
+  imputed_matrix[['Ensemble.Fast']] = df.impute.Ensemble.Fast
 
-  out_matrix = out_matrix[out]
+  out_matrix = imputed_matrix[out]
 
   sink()
   # print(paste("Method",method.idx,"complete"))

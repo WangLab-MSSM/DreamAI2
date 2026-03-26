@@ -9,19 +9,23 @@ Author: Weiping Ma, Jessica Ren, Sunkyu Kim, Shrabanti Chowdhury, Zhi Li, Thomas
   Julio Saez-Rodriguez, Pei Wang
 Maintainer: Weiping Ma <weiping.ma@mssm.edu>, Jessica Ren<jessicaqren@gmail.com>
 Description: The function imputes the missing protein abundances in a protein-sample matrix 
-  using individual or ensemble output from 7 individual methods. The 7 methods include K-nearest 
-  neighbor (KNN), Nonparametric Missing Value Imputation using Random Forest (MissForest), 
-  Abundance Dependent Missing Imputation (ADMIN), Iteratively Reweighted Nuclear Norm (IRNN) 
-  algorithm with SCAD penalty (Brinn), Matrix factorization algorithm to obtain latent parameters 
-  of proteins and samples with MCMC algorithm used for the optimization (SpectroFM), a flexible, 
-  iterative, regression based imputation approach (RegImpute) and Multivariate Imputation by 
-  Chained Equations (MICE). 
+  using individual or ensemble output from 7 methods. 
+  The 7 methods include K-nearest neighbor (KNN), 
+  Nonparametric Missing Value Imputation using Random Forest (MissForest), 
+  Abundance Dependent Missing Imputation (ADMIN), 
+  Iteratively Reweighted Nuclear Norm (IRNN) algorithm with SCAD penalty (Brinn), 
+  Matrix factorization algorithm to obtain latent parameters of proteins and samples with MCMC algorithm used for the optimization (SpectroFM), 
+  a flexible, iterative, regression based imputation approach (RegImpute) 
+  and Multivariate Imputation by Chained Equations (MICE). 
 License: Apache License (>= 2)
-Imports: Rcpp, glmnet, impute
+Imports:
+        Rcpp,glmnet,impute,mice,missForest,Matrix,cluster,devtools,foreach,iterators,itertools,randomForest,survival
+LinkingTo: Rcpp
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Depends: R (>= 3.5)
 NeedsCompilation: yes
-Packaged: 2026-03-24 16:12:11 UTC; maw01
+Packaged: 2026-03-26 21:19:00 UTC; maw01

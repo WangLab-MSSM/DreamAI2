@@ -10,6 +10,8 @@ impute.SpectroFM(input_table, iter, verbose = FALSE)
 \item{input_table}{A data frame with missing values or Nas}
 
 \item{iter}{Number of iterations}
+
+\item{verbose}{verbose in mcmc procedure}
 }
 \value{
 Imputed data frame
@@ -19,8 +21,7 @@ The function impute.SpectroFM imputes a dataset with missing values or NA's usin
 }
 \examples{
 \dontrun{
-data(datapnnl)
-data<-datapnnl.rm.ref[1:100,1:21]
+data<-data.DIA[1:100,1:50]
 impute.SpectroFM(input_table=as.data.frame(data), iter = 40)
 }
 }

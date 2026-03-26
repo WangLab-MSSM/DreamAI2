@@ -1,15 +1,14 @@
-#' title: IRNN algorithm for matrix completion
-#' Arguments:
-#' fun_sg: {scad_sg, mcp_sg}, the supergradient of the selected nonconvex surrogate function of L0 norm
-#' y: a vector with all entry values
-#' IDX: a vector with all entry positions
-#' m: the number of rows present in the incomplete dataset (proteins)
-#' n: the number of columns present in the incomplete dataset (samples)
-#' gamma: 'fun_sg''s parameter
-#' x_initial: the initial matrix
+#' @title: IRNN algorithm for matrix completion
+#' @param fun_sg the supergradient of the selected nonconvex surrogate function of L0 norm of (scad_sg, mcp_sg)
+#' @param y a vector with all entry values
+#' @param IDX a vector with all entry positions
+#' @param m the number of rows present in the incomplete dataset (proteins)
+#' @param n the number of columns present in the incomplete dataset (samples)
+#' @param gamma 'fun_sg''s parameter
+#' @param x_initial the initial matrix
 #'
-#' return: an imputed matrix
-#'
+#' @return: an imputed matrix
+#' @export
 mc.IRNN <- function(fun_sg, y, IDX, m, n, gamma, x_initial)
 {
   err <- 1e-6
@@ -21,11 +20,11 @@ mc.IRNN <- function(fun_sg, y, IDX, m, n, gamma, x_initial)
   mu <- 1.1 * normfac
   x <- as.vector(as.matrix(x_initial))
   x.matrix <- x_initial
-  lambdaInit <- decfac * max(abs(Mfun(m*n, IDX, y, 2)))
-  lambda <- lambdaInit
+  l.init = decfac * max(abs(Mfun(m*n, IDX, y, 2)))
+  lambda = l.init
   f_current <- sqrt(sum((y-Mfun(m*n, IDX, x, 1))^2)) + lambda * sum(abs(x))
 
-  while (lambda > lambdaInit * tol)
+  while (lambda > l.init * tol)
   {
     for (ins in 1:insweep)
     {
@@ -56,6 +55,7 @@ mc.IRNN <- function(fun_sg, y, IDX, m, n, gamma, x_initial)
 }
 
 # the supergradients of popular nonconvex surrogate functions of L0-norm
+#' @noRd
 scad_sg <- function(x, gamma, lambda)
 {
   x <- abs(x)
@@ -67,6 +67,7 @@ scad_sg <- function(x, gamma, lambda)
   return (y)
 }
 
+#' @noRd
 mcp_sg <- function(x, gamma, lambda)
 {
   x = abs(x)
@@ -76,6 +77,7 @@ mcp_sg <- function(x, gamma, lambda)
   return(y)
 }
 
+#' @noRd
 Mfun <- function(N, IDX, x, mode)
 {
   if (mode == 1) {y <- x[IDX]}
@@ -87,15 +89,13 @@ Mfun <- function(N, IDX, x, mode)
   return (y)
 }
 
+
+#' @title: the selection process of parameter gamma using Cross Validation
 #'
-#' title: the selection process of parameter gamma using Cross Validation
+#' @param x a matrix or data frame with either NAs or 0s as missings.
 #'
-#' Arguments:
-#' x: a matrix or data frame with either NAs or 0s as missings.
-#'
-#' return: the best performed (with lowest MSE) gamma among
-#'         (1e-3, 1e-2, 1e-1, 1, 10, 20, ..., 90, 100, 120, 140, ..., 480, 500)
-#'
+#' @return the best performed (with lowest MSE) gamma among (1e-3, 1e-2, 1e-1, 1, 10, 20, ..., 90, 100, 120, 140, ..., 480, 500)
+#' @noRd
 gamma.CV <- function (x)
 {
   m <- dim(x)[1]
@@ -135,6 +135,7 @@ gamma.CV <- function (x)
   return (glist[id])
 }
 
+#' @noRd
 CV.mse <- function(x.imp, x.true, v.posi)
 {
   ans <- mean((matrix(as.matrix(x.imp),ncol = 1)[v.posi]-matrix(as.matrix(x.true),ncol = 1)[v.posi])^2)
@@ -155,8 +156,7 @@ CV.mse <- function(x.imp, x.true, v.posi)
 #'
 #' @examples
 #' \dontrun{
-#' data(datapnnl)
-#' data<-datapnnl.rm.ref[1:100,1:21]
+#' data<-data.DIA[1:100,1:50]
 #' impute.Birnn(data=as.matrix(data), gamma = 50, CV = FALSE)
 #' }
 #' @export
