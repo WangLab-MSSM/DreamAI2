@@ -103,8 +103,8 @@ DreamAI2_Bagging(data, k = 10, maxiter_MF = 10, ntree = 100,
   gamma_ADMIN = NA, gamma = 50, CV = FALSE,
   fillmethod = "row_mean", maxiter_RegImpute = 10,
   conv_nrmse = 1e-06, iter_SpectroFM = 40, method = c("KNN",
-  "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "Ensemble"),out=c("Enemble"),
-  SamplesPerBatch, n.bag, save.out = TRUE, path = NULL, ProcessNum = 1)
+  "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),out=c("Enemble.Fast"),
+  seed.bags, SamplesPerBatch, n.bag, save.out = TRUE, path = NULL, ProcessNum = 1)
 ```
 ### Arguments
   
@@ -128,6 +128,7 @@ DreamAI2_Bagging(data, k = 10, maxiter_MF = 10, ntree = 100,
 | method_mice           | "pmm"   | imputation method to be used for each column in "MICE"
 | maxiter_mice          | 20      | number of iterations in "MICE"
 | method		      | must specify    | a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute", "Ensemble")
+|seed.bags			| NULL				 |random seed used for generating missing values in bagging sets
 | SamplesPerBatch			             |      	     | number of samples per batch (batch size in the original data)
 | n.bag		    |      	     | number of pseudo datasets to generate and impute in the current process   
 |save.out            |     | logical indicator whether or not to save the output. When TRUE output is saved, when FALSE output is returned
@@ -146,7 +147,8 @@ This function can be run as parallel job in cluster. It generates and saves a .R
 ```
 data("data.DIA")
 data<-data.DIA[1:100,1:50]
-impute<-DreamAI2_Bagging(data = data,k = 10,maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2), gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"), out = c("Ensemble.Fast"), SamplesPerBatch = 1, n.bag = 2, save.out = TRUE, path = "dir_of_bagging_imputation_output", ProcessNum = 1)
+impute<-DreamAI2_Bagging(data = data,k = 10,maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2), gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"), out = c("Ensemble.Fast"),
+seed.bags = c(1111,2222), SamplesPerBatch = 1, n.bag = 2, save.out = TRUE, path = "dir_of_bagging_imputation_output", ProcessNum = 1)
 impute$impute$Ensemble.Fast
 ```
 
