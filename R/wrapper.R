@@ -40,7 +40,7 @@ bag.summary<-function(method=c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM
   SpectroFM.out<-list()
   MICE.out<-list()
   Ensemble.out<-list()
-
+  Ensemble.Fast.out<-list()
   n.bag.out<-list()
 
   for(i in 1:nNodes)
@@ -107,8 +107,23 @@ bag.summary<-function(method=c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM
       print("No output for MICE")
       sink()
     }
+    
+    if("Ensemble" %in% method){
+      Ensemble.out[[i]]<-bag.output$impute$Ensemble
+    }else{
+      sink("NULL")
+      print("No output for Ensemble")
+      sink()
+    }
 
-    Ensemble.out[[i]]<-bag.output$impute$Ensemble
+
+    if("Ensemble.Fast" %in% method){
+      Ensemble.Fast.out[[i]]<-bag.output$impute$Ensemble.Fast
+    }else{
+      sink("NULL")
+      print("No output for Ensemble.Fast")
+      sink()
+    }
 
     n.bag.out[[i]]<-bag.output$n.bag
   }
@@ -157,7 +172,14 @@ bag.summary<-function(method=c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM
     d.impute.MICE<-matrix(0,nrow(MICE.out[[1]]),ncol(MICE.out[[1]]))
   }
 
-  d.impute.Ensemble<-matrix(0,nrow(Ensemble.out[[1]]),ncol(Ensemble.out[[1]]))
+  if("Ensemble" %in% method){
+    d.impute.Ensemble<-matrix(0,nrow(Ensemble.out[[1]]),ncol(Ensemble.out[[1]]))
+  }
+  
+  if("Ensemble.Fast" %in% method){
+    d.impute.Ensemble.Fast<-matrix(0,nrow(Ensemble.Fast.out[[1]]),ncol(Ensemble.Fast.out[[1]]))
+  }
+  
   n.bag.tot<-0
 
   for(i in 1:nNodes)
@@ -190,7 +212,14 @@ bag.summary<-function(method=c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM
     d.impute.MICE<-d.impute.MICE+n.bag.out[[i]]*MICE.out[[i]]
     }
 
-    d.impute.Ensemble<-d.impute.Ensemble+n.bag.out[[i]]*Ensemble.out[[i]]
+    if("Ensemble" %in% method){
+      d.impute.Ensemble<-d.impute.Ensemble+n.bag.out[[i]]*Ensemble.out[[i]]
+    }
+  
+    if("Ensemble.Fast" %in% method){
+      d.impute.Ensemble.Fast<-d.impute.Ensemble.Fast+n.bag.out[[i]]*Ensemble.Fast.out[[i]]
+    }
+    
     n.bag.tot<-n.bag.tot + n.bag.out[[i]]
   }
 
@@ -231,9 +260,15 @@ bag.summary<-function(method=c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM
   imputed_matrix<-c(imputed_matrix,list("MICE"=as.matrix(d.impute.MICE.final)))
   }
 
-  d.impute.Ensemble.final<-d.impute.Ensemble/n.bag.tot
-  imputed_matrix<-c(imputed_matrix,list("Ensemble"=as.matrix(d.impute.Ensemble.final)))
-
+  if("Ensemble" %in% method){
+    d.impute.Ensemble.final<-d.impute.Ensemble/n.bag.tot
+    imputed_matrix<-c(imputed_matrix,list("Ensemble"=as.matrix(d.impute.Ensemble.final)))
+  }
+  
+  if("Ensemble.Fast" %in% method){
+    d.impute.Ensemble.Fast.final<-d.impute.Ensemble.Fast/n.bag.tot
+    imputed_matrix<-c(imputed_matrix,list("Ensemble.Fast"=as.matrix(d.impute.Ensemble.Fast.final)))
+    }
 
   # methods<-c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE")
   #
