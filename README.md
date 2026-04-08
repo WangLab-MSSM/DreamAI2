@@ -39,7 +39,7 @@ DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100,
   maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2),
   gamma_ADMIN = NA, gamma = 50, CV = FALSE,
   fillmethod = "row_mean", maxiter_RegImpute = 10,
-  conv_nrmse = 1e-06, iter_SpectroFM = 40,
+  conv_nrmse = 1e-06, ,n_train = 50,nfolds = 10,nlambda = 100,iter_SpectroFM = 40,
   m_mice = 1, method_mice = "pmm", maxiter_mice = 20,
   method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute","MICE"),
   out = c("Ensemble.Fast"))
@@ -61,6 +61,9 @@ DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100,
 | fillmethod			             | "row_mean" 	           | a string identifying the method to be used to initially filling the missing values using simple imputation for "RegImpute". That could be "row_mean" or "zeros", with "row_mean" being the default. It throws an warning if "row_median" is used.
 | maxiter_RegImpute			     | 10         | maximum number of iterations to reach convergence in the imputation by "RegImpute"
 | conv_nrmse			             | 1e-06     	     | convergence threshold for "RegImpute"
+| n_train | 50  | number of predictor used for training for "RegImpute" 
+| nfolds | 10  | number of folds in cross validation of glmnet fitting for "RegImpute"
+| nlambda | 100 |  The number of lambda values for "RegImpute"
 | iter_SpectroFM		    | 40     	     | number of iterations for "SpectroFM"
 | m_mice                | 1       | number of multiple imputations in "MICE"
 | method_mice           | "pmm"   | imputation method to be used for each column in "MICE"
@@ -79,7 +82,8 @@ If all methods are specified for obtaining "Ensemble" imputed matrix, the approx
 ```
 data("data.DIA")
 data<-data.DIA[1:100,1:50]
-impute<- DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2),gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"), out = c("Ensemble","Ensemble.Fast"))
+impute<- DreamAI2(data, k = 10, maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2),gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6,n_train = 50,nfolds = 10,nlambda = 100, iter_SpectroFM = 40, 
+m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"), out = c("Ensemble","Ensemble.Fast"))
 impute$Ensemble
 impute$Ensemble.Fast
 ```
@@ -102,7 +106,8 @@ DreamAI2_Bagging(data, k = 10, maxiter_MF = 10, ntree = 100,
   maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2),
   gamma_ADMIN = NA, gamma = 50, CV = FALSE,
   fillmethod = "row_mean", maxiter_RegImpute = 10,
-  conv_nrmse = 1e-06, iter_SpectroFM = 40, method = c("KNN",
+  conv_nrmse = 1e-06,n_train = 50,nfolds = 10,nlambda = 100, 
+  iter_SpectroFM = 40, method = c("KNN",
   "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),out=c("Enemble.Fast"),
   seed.bags, SamplesPerBatch, n.bag, save.out = TRUE, path = NULL, ProcessNum = 1)
 ```
@@ -123,6 +128,9 @@ DreamAI2_Bagging(data, k = 10, maxiter_MF = 10, ntree = 100,
 | fillmethod			             | "row_mean" 	           | a string identifying the method to be used to initially filling the missing values using simple imputation for "RegImpute". That could be "row_mean" or "zeros", with "row_mean" being the default. It throws an warning if "row_median" is used.
 | maxiter_RegImpute			     | 10         | maximum number of iterations to reach convergence in the imputation by "RegImpute"
 | conv_nrmse			             | 1e-06     	     | convergence threshold for "RegImpute"
+| n_train | 50  | number of predictor used for training for "RegImpute" 
+| nfolds | 10  | number of folds in cross validation of glmnet fitting for "RegImpute"
+| nlambda | 100 |  The number of lambda values for "RegImpute"
 | iter_SpectroFM		    | 40     	     | number of iterations for "SpectroFM"
 | m_mice                | 1       | number of multiple imputations in "MICE"
 | method_mice           | "pmm"   | imputation method to be used for each column in "MICE"
@@ -147,7 +155,8 @@ This function can be run as parallel job in cluster. It generates and saves a .R
 ```
 data("data.DIA")
 data<-data.DIA[1:100,1:50]
-impute<-DreamAI2_Bagging(data = data,k = 10,maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2), gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6, iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"), out = c("Ensemble.Fast"),
+impute<-DreamAI2_Bagging(data = data,k = 10,maxiter_MF = 10, ntree = 100, maxnodes = NULL, maxiter_ADMIN = 30, tol = 10^(-2), gamma_ADMIN = NA, gamma = 50, CV = FALSE, fillmethod = "row_mean", maxiter_RegImpute = 10, conv_nrmse = 1e-6,n_train = 50,nfolds = 10,nlambda = 100, 
+iter_SpectroFM = 40, m_mice = 1, method_mice = "pmm",  maxiter_mice = 20, method = c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"), out = c("Ensemble.Fast"),
 seed.bags = c(1111,2222), SamplesPerBatch = 1, n.bag = 2, save.out = TRUE, path = "dir_of_bagging_imputation_output", ProcessNum = 1)
 impute$impute$Ensemble.Fast
 ```

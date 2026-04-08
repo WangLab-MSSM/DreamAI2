@@ -292,14 +292,47 @@ impute.ADMIN = function(data,data.ini=NA,gamma=NA, k=10, maxiter_ADMIN=30,tol=10
 #' data<-data.DIA[1:100,1:50]
 #' impute.mice(data=as.matrix(data))
 #' }
-impute.mice = function(data,m = 1,method = 'pmm',maxit = 20)
+
+impute.mice = function(data,m = 1,method = 'pmm',maxit = 20,...)
 {
   requireNamespace("mice")
+  requireNamespace("impute")
+  # impute.temp = mice::mice(data, m = m, method = method, maxit = maxit,...)
+  # impute.list <- mice::complete(impute.temp, 'all')
+  # impute.out = Reduce('+',impute.list)/length(impute.list)
+  # rownames(impute.out) = rownames(data)
 
-  impute.temp = mice::mice(data, m = m, method = method, maxit = maxit, print=FALSE)
+  pred = 1-diag(1,ncol(data))
+  colnames(pred) = colnames(data)
+  rownames(pred) = colnames(data)
+
+  if(ncol(data)>50)
+  {
+    q.cut = 0.9
+    cor.s = cor(data,use = 'pairwise.complete.obs')
+    cor.q.cut = as.numeric(quantile(cor.s[upper.tri(cor.s)],probs = q.cut))
+    pred <- mice::quickpred(data, mincor = cor.q.cut)
+
+    cor.top50 = as.matrix(t(apply(cor.s,1,function(x){rank(-abs(x))<52})))
+    diag(cor.top50) = 0
+    rownames(cor.top50) = colnames(data)
+    colnames(cor.top50) = colnames(data)
+
+    pred[rowSums(pred)<50,] = cor.top50[rowSums(pred)<50,]
+  }
+
+
+  impute.temp = mice::mice(data, m = m, method = method, maxit = maxit,predictorMatrix = pred,...)
+
   impute.list <- mice::complete(impute.temp, 'all')
   impute.out = Reduce('+',impute.list)/length(impute.list)
   rownames(impute.out) = rownames(data)
+  colnames(impute.out) = colnames(data)
+
+  if(sum(is.na(impute.out))>0)
+  {impute.out = t(impute::impute.knn(t(impute.out),k = 10)$data)}
+
   return(impute.out);
 }
+
 
