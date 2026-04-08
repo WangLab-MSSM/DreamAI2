@@ -19,6 +19,9 @@ DreamAI2_Bagging(
   fillmethod = "row_mean",
   maxiter_RegImpute = 10,
   conv_nrmse = 1e-06,
+  n_train = 50,
+  nfolds = 10,
+  nlambda = 100,
   iter_SpectroFM = 40,
   m_mice = 1,
   method_mice = "pmm",
@@ -61,6 +64,12 @@ DreamAI2_Bagging(
 \item{maxiter_RegImpute}{maximum number of iterations to reach convergence in the imputation by "RegImpute"}
 
 \item{conv_nrmse}{convergence threshold for "RegImpute"}
+
+\item{n_train}{number of predictor used for training for "RegImpute" , default is 50}
+
+\item{nfolds}{number of folds in cross validation of glmnet fitting for "RegImpute", default is 10.}
+
+\item{nlambda}{The number of lambda values for "RegImpute", default is 100.}
 
 \item{iter_SpectroFM}{number of iterations for "SpectroFM"}
 

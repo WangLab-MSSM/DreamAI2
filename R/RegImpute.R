@@ -132,6 +132,9 @@ returnTestSet<-function(col,filled,test_indices){
 #' @param fillmethod a string identifying the method to be used that could be "row_mean" or "zeros", with "row_mean" being the default. It throws an warning if "row_median" is used.
 #' @param maxiter_RegImpute a integer identifying maximum number of iterations to reach convergence
 #' @param conv_nrmse convergence threshold of NRMSE
+#' @param n_train number of predictor used for training, default is 50
+#' @param nfolds number of folds in cross validation of glmnet fitting, default is 10.
+#' @param nlambda The number of lambda values, default is 100.
 #' @return the imputed version of the dataset
 #' @importFrom glmnet cv.glmnet
 #' @export
@@ -141,11 +144,12 @@ returnTestSet<-function(col,filled,test_indices){
 #' impute.RegImpute(data=as.matrix(data), fillmethod = "row_mean",
 #' maxiter_RegImpute = 10,conv_nrmse = 1e-06)
 #' }
-impute.RegImpute <- function(data,fillmethod,maxiter_RegImpute,conv_nrmse){
+impute.RegImpute <- function(data,fillmethod,maxiter_RegImpute,conv_nrmse,n_train = 50,nfolds = 10,nlambda = 100){
   filled = backfill(data,fillmethod)
   print(paste("Starting Imputation With ",toString(maxiter_RegImpute)," Max. Iterations"))
   missing_indices = which(is.na(data), arr.ind=TRUE)
 
+  if(is.null(n_train)){n_train = ncol(data)-1}
 
   #Begin iterative imputation.  Missing value slots in data are updated on each iteration
   for(i in 1:maxiter_RegImpute){
@@ -163,34 +167,34 @@ impute.RegImpute <- function(data,fillmethod,maxiter_RegImpute,conv_nrmse){
       target = returnTargets(col,data,present_indices)
       test_indices = returnTestIndices(col,data)
       test = returnTestSet(col,filled,test_indices)
+      indices_keep_train = na.omit(order(cor(target,train,use = 'pairwise.complete.obs'),decreasing = T)[1:n_train])
+      #used http://ricardoscr.github.io/how-to-use-ridge-and-lasso-in-r.html as tutorial on ridge regression in R
+      cv_fit <- glmnet::cv.glmnet(train[,indices_keep_train], target, alpha=0, standardize=TRUE,nfolds = nfolds,nlambda = nlambda)
+      opt_lambda = cv_fit$lambda.min
+      fit = cv_fit$glmnet.fit
 
-        #used http://ricardoscr.github.io/how-to-use-ridge-and-lasso-in-r.html as tutorial on ridge regression in R
-        cv_fit <- glmnet::cv.glmnet(train, target, alpha=0, standardize=TRUE)
-        opt_lambda = cv_fit$lambda.min
-        fit = cv_fit$glmnet.fit
-
-        test<-as.matrix(test)
-        if(dim(test)[2]==1)
-        {
-          predicted = stats::predict(fit, s = opt_lambda, newx=t(test))
-        }else{
-          predicted = stats::predict(fit, s = opt_lambda, newx=test)
-        }
-        filled[test_indices,col] = predicted
+      test<-as.matrix(test[,indices_keep_train])
+      if(dim(test)[2]==1)
+      {
+        predicted = stats::predict(fit, s = opt_lambda, newx=t(test))
+      }else{
+        predicted = stats::predict(fit, s = opt_lambda, newx=test)
+      }
+      filled[test_indices,col] = predicted
     }
 
-	#test for convergence at each iteration
-  if(i==1){
-	  impvals = filled[missing_indices]
-	  }
-	else{
-	NRMSE = sqrt(mean((impvals - filled[missing_indices])^2))
-	print(paste("NRMSE = ",NRMSE))
-	impvals = filled[missing_indices]
-	if (NRMSE<conv_nrmse){
-	    return(filled)
-	    }
-	  }
+    #test for convergence at each iteration
+    if(i==1){
+      impvals = filled[missing_indices]
+    }
+    else{
+      NRMSE = sqrt(mean((impvals - filled[missing_indices])^2))
+      print(paste("NRMSE = ",NRMSE))
+      impvals = filled[missing_indices]
+      if (NRMSE<conv_nrmse){
+        return(filled)
+      }
+    }
   }
   return(filled)
 }

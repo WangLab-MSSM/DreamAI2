@@ -16,6 +16,9 @@
 #' @param fillmethod a string identifying the method to be used to initially filling the missing values using simple imputation for "RegImpute". That could be "row_mean" or "zeros", with "row_mean" being the default. It throws an warning if "row_median" is used.
 #' @param maxiter_RegImpute maximum number of iterations to reach convergence in the imputation by "RegImpute".
 #' @param conv_nrmse convergence threshold for "RegImpute".
+#' @param n_train number of predictor used for training for "RegImpute" , default is 50
+#' @param nfolds number of folds in cross validation of glmnet fitting for "RegImpute", default is 10.
+#' @param nlambda The number of lambda values for "RegImpute", default is 100.
 #' @param iter_SpectroFM number of iterations for "SpectroFM".
 #' @param m_mice Number of multiple imputations in MICE. The default is m=1.
 #' @param method_mice Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.
@@ -38,7 +41,7 @@
 #' impute$Ensemble
 #' }
 DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,
-                   CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,iter_SpectroFM=40,
+                   CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,n_train = 50,nfolds = 10,nlambda = 100,iter_SpectroFM=40,
                    m_mice = 1, method_mice = 'pmm', maxiter_mice = 20,
                    method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"),out=c("Ensemble.Fast"))
 {
@@ -232,7 +235,9 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
   {
     name = "RegImpute"
     sink("NULL")
-    d.impute.RegImpute=impute.RegImpute(data=as.matrix(data),fillmethod=fillmethod,maxiter_RegImpute = maxiter_RegImpute,conv_nrmse = conv_nrmse)
+    d.impute.RegImpute=impute.RegImpute(data=as.matrix(data),fillmethod=fillmethod,
+                                        maxiter_RegImpute = maxiter_RegImpute,conv_nrmse = conv_nrmse,
+                                        n_train = n_train,nfolds = nfolds,nlambda = nlambda)
     # ensemble<-ensemble+d.impute.RegImpute
     sink()
     # print(paste("Method",method.idx,"complete"))
@@ -246,6 +251,9 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
   ## MICE ##
   if("MICE" %in% out.match)
   {
+    if ("Matrix" %in% .packages()) {
+      detach("package:Matrix", unload=TRUE)
+    }
     name = "MICE"
     sink("NULL")
     d.impute.MICE = impute.mice(data = as.matrix(data),m = m_mice ,method = method_mice ,maxit = maxiter_mice)

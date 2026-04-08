@@ -4,7 +4,15 @@
 \alias{impute.RegImpute}
 \title{Imputation of Missing Protein Abundance using Glmnet Ridge Regression.}
 \usage{
-impute.RegImpute(data, fillmethod, maxiter_RegImpute, conv_nrmse)
+impute.RegImpute(
+  data,
+  fillmethod,
+  maxiter_RegImpute,
+  conv_nrmse,
+  n_train = 50,
+  nfolds = 10,
+  nlambda = 100
+)
 }
 \arguments{
 \item{data}{dataset in the form of a matrix or data frame with either NAs or 0s as missings.}
@@ -14,6 +22,12 @@ impute.RegImpute(data, fillmethod, maxiter_RegImpute, conv_nrmse)
 \item{maxiter_RegImpute}{a integer identifying maximum number of iterations to reach convergence}
 
 \item{conv_nrmse}{convergence threshold of NRMSE}
+
+\item{n_train}{number of predictor used for training, default is 50}
+
+\item{nfolds}{number of folds in cross validation of glmnet fitting, default is 10.}
+
+\item{nlambda}{The number of lambda values, default is 100.}
 }
 \value{
 the imputed version of the dataset
