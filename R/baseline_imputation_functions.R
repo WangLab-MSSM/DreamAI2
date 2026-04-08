@@ -292,11 +292,11 @@ impute.ADMIN = function(data,data.ini=NA,gamma=NA, k=10, maxiter_ADMIN=30,tol=10
 #' data<-data.DIA[1:100,1:50]
 #' impute.mice(data=as.matrix(data))
 #' }
-impute.mice = function(data,m = 1,method = 'pmm',maxit = 20,  ...)
+impute.mice = function(data,m = 1,method = 'pmm',maxit = 20)
 {
   requireNamespace("mice")
 
-  impute.temp = mice::mice(data, m = m, method = method, maxit = 20, print=FALSE)
+  impute.temp = mice::mice(data, m = m, method = method, maxit = maxit, print=FALSE)
   impute.list <- mice::complete(impute.temp, 'all')
   impute.out = Reduce('+',impute.list)/length(impute.list)
   rownames(impute.out) = rownames(data)
