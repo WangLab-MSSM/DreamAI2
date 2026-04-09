@@ -283,6 +283,7 @@ impute.ADMIN = function(data,data.ini=NA,gamma=NA, k=10, maxiter_ADMIN=30,tol=10
 #' @param m Number of multiple imputations. The default is m=1.
 #' @param method Specifying the imputation method to be used for each column in data. The default is 'pmm'.
 #' @param maxit A scalar giving the number of iterations. The default is 20.
+#' @param seed random seed used by the random number generator set.seed().
 #' @param ... other parameters in mice() function
 #' @return the imputed version of the dataset
 #' @export
@@ -293,7 +294,7 @@ impute.ADMIN = function(data,data.ini=NA,gamma=NA, k=10, maxiter_ADMIN=30,tol=10
 #' impute.mice(data=as.matrix(data))
 #' }
 
-impute.mice = function(data,m = 1,method = 'pmm',maxit = 20,...)
+impute.mice = function(data,m = 1,method = 'pmm',maxit = 20,seed,...)
 {
   requireNamespace("mice")
   requireNamespace("impute")
@@ -322,7 +323,7 @@ impute.mice = function(data,m = 1,method = 'pmm',maxit = 20,...)
   }
 
 
-  impute.temp = mice::mice(data, m = m, method = method, maxit = maxit,predictorMatrix = pred,...)
+  impute.temp = mice::mice(data, m = m, method = method, maxit = maxit,seed = seed, predictorMatrix = pred,...)
 
   impute.list <- mice::complete(impute.temp, 'all')
   impute.out = Reduce('+',impute.list)/length(impute.list)

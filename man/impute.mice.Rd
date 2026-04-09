@@ -4,7 +4,7 @@
 \alias{impute.mice}
 \title{Imputation of Missing Protein Abundances using MICE}
 \usage{
-impute.mice(data, m = 1, method = "pmm", maxit = 20, ...)
+impute.mice(data, m = 1, method = "pmm", maxit = 20, seed, ...)
 }
 \arguments{
 \item{data}{dataset in the form of a matrix or data frame with NAs as missings.}
@@ -14,6 +14,8 @@ impute.mice(data, m = 1, method = "pmm", maxit = 20, ...)
 \item{method}{Specifying the imputation method to be used for each column in data. The default is 'pmm'.}
 
 \item{maxit}{A scalar giving the number of iterations. The default is 20.}
+
+\item{seed}{random seed used by the random number generator set.seed().}
 
 \item{...}{other parameters in mice() function}
 }

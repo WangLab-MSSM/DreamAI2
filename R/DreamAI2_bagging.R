@@ -39,6 +39,7 @@ diff_mr = function(x,gm.pnnl,data.obs.b,N){
 #' @param m_mice Number of multiple imputations in MICE. The default is m=1.
 #' @param method_mice Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.
 #' @param maxiter_mice A scalar giving the number of iterations in MICE. The default is 20.
+#' @param seed_mice random seed used in MICE.
 #' @param method a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute") based on which "Ensemble" imputed matrix will be obtained.
 #' @param out a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble".
 #' @param seed.bags random seed used for generating missing values in bagging sets
@@ -64,7 +65,7 @@ diff_mr = function(x,gm.pnnl,data.obs.b,N){
 DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),
                            gamma_bagging = NA, gamma_ADMIN=NA,gamma=50,
                            CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,n_train = 50,nfolds = 10,nlambda = 100,iter_SpectroFM=40,
-                           m_mice = 1, method_mice = 'pmm', maxiter_mice = 20,
+                           m_mice = 1, method_mice = 'pmm', maxiter_mice = 20,seed_mice = 123,
                            method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"),out=c("Ensemble.Fast"),
                            seed.bags = NULL,SamplesPerBatch,n.bag,save.out=TRUE,path=NULL,ProcessNum=1)
 {
@@ -198,7 +199,7 @@ DreamAI2_Bagging<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NUL
 
     DreamAI.bagging.temp<-DreamAI2(data=data.obs.new,k=k,maxiter_MF = maxiter_MF, ntree = ntree,maxnodes = maxnodes,maxiter_ADMIN=maxiter_ADMIN,tol=tol,gamma_ADMIN=gamma_ADMIN,gamma=gamma,
                                   CV=CV,fillmethod=fillmethod,maxiter_RegImpute=maxiter_RegImpute,conv_nrmse = conv_nrmse,n_train = n_train,nfolds = nfolds,nlambda = nlambda,
-                                   iter_SpectroFM=iter_SpectroFM,m_mice = m_mice, method_mice = method_mice, maxiter_mice = maxiter_mice,
+                                   iter_SpectroFM=iter_SpectroFM,m_mice = m_mice, method_mice = method_mice, maxiter_mice = maxiter_mice,seed_mice = seed_mice,
                                     method=method,out=out.temp)
 
     ########## summary ###############

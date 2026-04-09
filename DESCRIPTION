@@ -28,4 +28,4 @@ Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: R (>= 3.5)
 NeedsCompilation: yes
-Packaged: 2026-04-08 21:26:54 UTC; maw01
+Packaged: 2026-04-09 15:09:31 UTC; maw01
