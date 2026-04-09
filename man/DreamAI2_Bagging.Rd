@@ -26,6 +26,7 @@ DreamAI2_Bagging(
   m_mice = 1,
   method_mice = "pmm",
   maxiter_mice = 20,
+  seed_mice = 123,
   method = c("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM", "RegImpute", "MICE"),
   out = c("Ensemble.Fast"),
   seed.bags = NULL,
@@ -78,6 +79,8 @@ DreamAI2_Bagging(
 \item{method_mice}{Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.}
 
 \item{maxiter_mice}{A scalar giving the number of iterations in MICE. The default is 20.}
+
+\item{seed_mice}{random seed used in MICE.}
 
 \item{method}{a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute") based on which "Ensemble" imputed matrix will be obtained.}
 

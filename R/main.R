@@ -23,6 +23,7 @@
 #' @param m_mice Number of multiple imputations in MICE. The default is m=1.
 #' @param method_mice Specifying the imputation method to be used for each column in MICE. The default is 'pmm'.
 #' @param maxiter_mice A scalar giving the number of iterations in MICE. The default is 20.
+#' @param seed_mice random seed used in MICE.
 #' @param method a vector of imputation methods: ("KNN", "MissForest", "ADMIN", "Birnn", "SpectroFM, "RegImpute") based on which "Ensemble" imputed matrix will be obtained.
 #' @param out a vector of imputation methods for which the function will output the imputed matrices. Default is "Ensemble".
 #'
@@ -42,7 +43,7 @@
 #' }
 DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxiter_ADMIN=30,tol=10^(-2),gamma_ADMIN=NA,gamma=50,
                    CV=FALSE,fillmethod="row_mean",maxiter_RegImpute=10,conv_nrmse = 1e-6,n_train = 50,nfolds = 10,nlambda = 100,iter_SpectroFM=40,
-                   m_mice = 1, method_mice = 'pmm', maxiter_mice = 20,
+                   m_mice = 1, method_mice = 'pmm', maxiter_mice = 20,seed_mice = 123,
                    method=c("KNN","MissForest","ADMIN","Birnn","SpectroFM","RegImpute","MICE"),out=c("Ensemble.Fast"))
 {
   TimeStart<-proc.time()
@@ -256,7 +257,7 @@ DreamAI2<-function(data,k=10,maxiter_MF = 10, ntree = 100,maxnodes = NULL,maxite
     }
     name = "MICE"
     sink("NULL")
-    d.impute.MICE = impute.mice(data = as.matrix(data),m = m_mice ,method = method_mice ,maxit = maxiter_mice)
+    d.impute.MICE = impute.mice(data = as.matrix(data),m = m_mice ,method = method_mice ,maxit = maxiter_mice, seed = seed_mice)
     # ensemble<-ensemble+d.impute.knn
     sink()
     # print(paste("Method",method.idx,"complete"))
